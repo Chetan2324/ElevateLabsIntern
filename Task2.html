@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List App</title>
+    
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* A little custom CSS for our to-do list */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* A soft grey background */
+        }
+
+        /* Style for completed tasks */
+        .completed {
+            text-decoration: line-through;
+            color: #9ca3af; /* A lighter grey for completed text */
+        }
+        
+        /* A subtle transition for our list items */
+        #task-list li {
+            transition: background-color 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <!-- Main App Container -->
+    <div class="w-full max-w-md mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
+
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">My To-Do List</h1>
+            <p class="text-gray-500">Stay organized, get things done.</p>
+        </header>
+
+        <!-- Form to Add New Tasks -->
+        <form id="add-task-form" class="flex items-center gap-3 mb-6">
+            <input 
+                type="text" 
+                id="task-input"
+                placeholder="e.g., Finish my internship task"
+                class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+            >
+            <button 
+                type="submit"
+                class="bg-indigo-600 text-white font-semibold px-5 py-3 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition"
+            >
+                Add
+            </button>
+        </form>
+
+        <!-- List of Tasks -->
+        <div id="task-list-container">
+            <ul id="task-list" class="space-y-3">
+                <!-- Tasks will be dynamically added here by JavaScript -->
+                <!-- Example of a task item: 
+                <li class="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                    <span class="cursor-pointer">This is a sample task</span>
+                    <button class="text-red-500 hover:text-red-700">
+                        <svg class="w-6 h-6" ...>
+                    </button>
+                </li> 
+                -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. GETTING OUR HTML ELEMENTS ---
+        // We need to grab the form, the input field, and the list container
+        // so we can work with them in our JavaScript.
+        const taskForm = document.getElementById('add-task-form');
+        const taskInput = document.getElementById('task-input');
+        const taskList = document.getElementById('task-list');
+
+        // --- 2. THE FUNCTION TO ADD A NEW TASK ---
+        // This function runs every time we want to add a new task.
+        function addTask(event) {
+            // event.preventDefault() stops the form from submitting and reloading the page.
+            event.preventDefault(); 
+
+            // Get the text from the input field and trim any extra whitespace.
+            const taskText = taskInput.value.trim();
+
+            // If the input is empty, just do nothing and stop the function.
+            if (taskText === '') {
+                return;
+            }
+
+            // --- Create the new task item (the <li>) ---
+            const li = document.createElement('li');
+            li.className = 'flex items-center justify-between bg-gray-50 p-4 rounded-lg shadow-sm';
+
+            // --- Create the task text (the <span>) ---
+            const taskSpan = document.createElement('span');
+            taskSpan.textContent = taskText;
+            taskSpan.className = 'cursor-pointer flex-grow'; // Make the text part clickable
+
+            // --- Create the delete button ---
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'ml-4 text-gray-400 hover:text-red-600 transition';
+            // Using innerHTML to add an SVG icon for the trash can.
+            deleteButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            `;
+
+            // --- Put it all together ---
+            // Add the text and button inside the list item.
+            li.appendChild(taskSpan);
+            li.appendChild(deleteButton);
+            
+            // Add the new list item to the task list.
+            taskList.appendChild(li);
+
+            // --- Clean up ---
+            // Clear the input field for the next task.
+            taskInput.value = '';
+            // Put the cursor back in the input field.
+            taskInput.focus();
+        }
+
+        // --- 3. HANDLING CLICKS ON THE TASK LIST ---
+        // This function handles both completing and deleting tasks.
+        // We use "event delegation" by listening on the whole list (<ul>)
+        // instead of adding a listener to every single button.
+        function handleTaskListClick(event) {
+            const clickedElement = event.target;
+
+            // --- Check if a task's text was clicked to mark as complete ---
+            // .closest('span') finds the nearest span, if it exists.
+            if (clickedElement.tagName === 'SPAN') {
+                const li = clickedElement.parentElement;
+                li.classList.toggle('completed');
+                // We also toggle the class on the span itself to apply styles
+                clickedElement.classList.toggle('completed');
+            }
+
+            // --- Check if a delete button was clicked ---
+            // .closest('button') finds the button, even if we clicked the SVG icon inside it.
+            if (clickedElement.closest('button')) {
+                const li = clickedElement.closest('li');
+                // Remove the list item from the DOM.
+                li.remove();
+            }
+        }
+
+        // --- 4. ADDING OUR EVENT LISTENERS ---
+        // This is where we tell the browser to run our functions when things happen.
+        
+        // When the form is submitted (by clicking the button or pressing Enter), run addTask.
+        taskForm.addEventListener('submit', addTask);
+
+        // When a click happens anywhere inside the task list, run handleTaskListClick.
+        taskList.addEventListener('click', handleTaskListClick);
+    </script>
+</body>
+</html>

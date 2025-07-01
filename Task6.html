@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Pulse | Dynamic Contact Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f4f7f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .form-wrapper {
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .form-wrapper.hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h2 {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .header p {
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-control label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-control input,
+        .form-control textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-control input:focus,
+        .form-control textarea:focus {
+            outline: none;
+            border-color: #4A90E2;
+        }
+
+        .form-control.success input,
+        .form-control.success textarea {
+            border-color: #2ECC71;
+        }
+
+        .form-control.error input,
+        .form-control.error textarea {
+            border-color: #E74C3C;
+        }
+
+        .form-control small {
+            color: #E74C3C;
+            position: absolute;
+            bottom: -18px;
+            left: 0;
+            visibility: hidden;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .form-control.error small {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .form-control i {
+            position: absolute;
+            top: 42px;
+            right: 15px;
+            visibility: hidden;
+            font-size: 1.2rem;
+        }
+
+        .form-control.success .success-icon {
+            visibility: visible;
+            color: #2ECC71;
+        }
+
+        .form-control.error .error-icon {
+            visibility: visible;
+            color: #E74C3C;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            background-color: #4A90E2;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #357ABD;
+        }
+
+        button[type="submit"]:active {
+            transform: scale(0.98);
+        }
+
+        /* Success Message Styling */
+        .success-message-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(1.05);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .success-message-container.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        .success-content {
+            background: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .success-content i {
+            font-size: 3rem;
+            color: #2ECC71;
+        }
+
+        .success-content h3 {
+            margin: 20px 0 10px;
+            color: #333;
+        }
+
+        .success-content p {
+            color: #777;
+            margin-bottom: 20px;
+        }
+
+        #resetFormBtn {
+            padding: 12px 25px;
+            border: none;
+            background-color: #2ECC71;
+            color: white;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #resetFormBtn:hover {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-wrapper">
+            <div class="header">
+                <h2>Contact Us</h2>
+                <p>We'd love to hear from you. Please fill out this form.</p>
+            </div>
+            <form id="contactForm" novalidate>
+                <div class="form-control">
+                    <label for="username">Full Name</label>
+                    <input type="text" id="username" placeholder="Enter your full name">
+                    <i class="fas fa-check-circle success-icon"></i>
+                    <i class="fas fa-exclamation-circle error-icon"></i>
+                    <small>Error message</small>
+                </div>
+                <div class="form-control">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                    <i class="fas fa-check-circle success-icon"></i>
+                    <i class="fas fa-exclamation-circle error-icon"></i>
+                    <small>Error message</small>
+                </div>
+                <div class="form-control">
+                    <label for="message">Message</label>
+                    <textarea id="message" placeholder="Your message here..."></textarea>
+                    <i class="fas fa-check-circle success-icon"></i>
+                    <i class="fas fa-exclamation-circle error-icon"></i>
+                    <small>Error message</small>
+                </div>
+                <button type="submit">Send Message</button>
+            </form>
+        </div>
+        <div class="success-message-container" id="successMessage">
+            <div class="success-content">
+                <i class="fas fa-check-circle"></i>
+                <h3>Thank You!</h3>
+                <p>Your message has been sent successfully.</p>
+                <button id="resetFormBtn">Send Another Message</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('contactForm');
+            const username = document.getElementById('username');
+            const email = document.getElementById('email');
+            const message = document.getElementById('message');
+            
+            const formWrapper = document.querySelector('.form-wrapper');
+            const successMessageContainer = document.getElementById('successMessage');
+            const resetFormBtn = document.getElementById('resetFormBtn');
+
+            // Helper function to show error
+            const setError = (element, message) => {
+                const inputControl = element.parentElement;
+                const errorDisplay = inputControl.querySelector('small');
+
+                errorDisplay.innerText = message;
+                inputControl.classList.add('error');
+                inputControl.classList.remove('success');
+            }
+
+            // Helper function to show success
+            const setSuccess = element => {
+                const inputControl = element.parentElement;
+                const errorDisplay = inputControl.querySelector('small');
+
+                errorDisplay.innerText = '';
+                inputControl.classList.add('success');
+                inputControl.classList.remove('error');
+            };
+
+            // Helper function for email validation
+            const isValidEmail = email => {
+                const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(String(email).toLowerCase());
+            }
+
+            // Main validation function
+            const validateInputs = () => {
+                let isValid = true;
+                const usernameValue = username.value.trim();
+                const emailValue = email.value.trim();
+                const messageValue = message.value.trim();
+
+                // Validate Name
+                if (usernameValue === '') {
+                    setError(username, 'Full name is required');
+                    isValid = false;
+                } else {
+                    setSuccess(username);
+                }
+
+                // Validate Email
+                if (emailValue === '') {
+                    setError(email, 'Email is required');
+                    isValid = false;
+                } else if (!isValidEmail(emailValue)) {
+                    setError(email, 'Provide a valid email address');
+                    isValid = false;
+                } else {
+                    setSuccess(email);
+                }
+
+                // Validate Message
+                if (messageValue === '') {
+                    setError(message, 'Message cannot be empty');
+                    isValid = false;
+                } else if (messageValue.length < 10) {
+                    setError(message, 'Message must be at least 10 characters.');
+                    isValid = false;
+                } else {
+                    setSuccess(message);
+                }
+                
+                return isValid;
+            };
+
+            // Form submission event listener
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+                
+                if (validateInputs()) {
+                    console.log('Form is valid. Submitting...');
+                    // In a real app, you would send data to a server here.
+                    
+                    // Show success message
+                    formWrapper.classList.add('hidden');
+                    successMessageContainer.classList.add('visible');
+                } else {
+                    console.log('Form is invalid.');
+                }
+            });
+
+            // Reset form button listener
+            resetFormBtn.addEventListener('click', () => {
+                // Hide success message and show form
+                successMessageContainer.classList.remove('visible');
+                formWrapper.classList.remove('hidden');
+
+                // Reset form fields and validation states
+                form.reset();
+                document.querySelectorAll('.form-control').forEach(control => {
+                    control.classList.remove('success', 'error');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
